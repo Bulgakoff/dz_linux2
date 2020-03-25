@@ -25,24 +25,192 @@ $ mv file3.txt new_file.txt
 
 3. Создать несколько файлов. Создайте директорию, переместите файл туда. Удалите все созданные в этом и предыдущем задании директории и файлы.
 Linux_co2$ touch file{01..05}.txt
-/Linux_co2$ mkdir dir_for_del/
-$ mv file01.txt dir_for_del/
-hlbu@hlbu-ubuntu:~/Documents$ rm -r Linux_co2/
 
+/Linux_co2$ mkdir dir_for_del/
+
+$ mv file01.txt dir_for_del/
+
+hlbu@hlbu-ubuntu:~/Documents$ rm -r Linux_co2/
+42
 
 
 
 4. В ОС Linux скрытыми файлами считаются те, имена которых начинаются с символа “.”. Сколько скрытых файлов в вашем домашнем каталоге? (Использовать конвейер. Подсказка: для подсчета количества строк можно использовать wc).
-hlbu@hlbu-ubuntu:~$ ls -A | grep '^\.' | wc -l
+$ ls -A $HOME | grep '^\.' | wc -l
 
 
 5. Попробовать вывести с помощью cat все файлы в директории /etc. Направить ошибки в отдельный файл в вашей домашней директории. Сколько файлов, которые не удалось посмотреть, оказалось в списке?
-cat
+hlbu@hlbu-ubuntu:~$ ls -Al /etc/ > total_etc.txt
+hlbu@hlbu-ubuntu:~$ cat total_etc.txt | wc -l
+216 # всего папок и файлов 
+hlbu@hlbu-ubuntu:~$ grep '^-' total_etc.txt | wc -l
+89 #отфильтрованы  в /etc/ только файлы ---> 89 штук
+
+C cat задание я не понял... как моожно с вывести с помощью cat все файлы в директории (он же содержимое выводит , а не файлы )
+hlbu@hlbu-ubuntu:~$ cat -b  /etc/* >good_etc.txt 2>err_etc.txt
+hlbu@hlbu-ubuntu:~$ wc -l err_etc.txt
+127 err_etc.txt # ---> ошибочных строк (дерикторий) 127 штук
 
 
 6. Запустить в одном терминале программу, в другом терминале посмотреть PID процесса и остановить с помощью kill, посылая разные типы сигналов. Что происходит?
+
+
+hlbu@hlbu-ubuntu:~/Linux_course/programming$ ./for_while_dz.sh
+Enter you name:
+^Z
+[1]+  Stopped                 ./for_while_dz.sh
+
+hlbu@hlbu-ubuntu:~/Linux_course/programming$ ps
+  PID TTY          TIME CMD
+ 1469 pts/0    00:00:00 bash
+ 3173 pts/0    00:00:00 for_while_dz.sh
+ 3189 pts/0    00:00:00 ps
+hlbu@hlbu-ubuntu:~/Linux_course/programming$ kill -9 3173 # все остальные сигналы посылаемые  kill (кроме -9) из другого терминала не сработали.
+[1]+  Killed                  ./for_while_dz.sh
+hlbu@hlbu-ubuntu:~/Linux_course/programming$ ./for_while_dz.sh
+
+
+
 7. *Отобразить в /dev список устройств, которые в настоящее время используются вашим UID (для этого используется команда lsof). Организовать конвейер через less, чтобы посмотреть их должным образом.
+
+
+hlbu@hlbu-ubuntu:~$ lsof /dev/ | less
+
+
 8. *Cоздайте директорию для хранения фотографий, в ней должны быть директории по годам, (например, за последние 5 лет), и в каждой директории года по директории для месяца.
+
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2$ mkdir -p TOTAL/20{16..20}/month{01..12}
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2$ cd TOTAL/
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2/TOTAL$ tree
+.
+├── 2016
+│   ├── month01
+│   ├── month02
+│   ├── month03
+│   ├── month04
+│   ├── month05
+│   ├── month06
+│   ├── month07
+│   ├── month08
+│   ├── month09
+│   ├── month10
+│   ├── month11
+│   └── month12
+├── 2017
+│   ├── month01
+│   ├── month02
+│   ├── month03
+│   ├── month04
+│   ├── month05
+│   ├── month06
+│   ├── month07
+│   ├── month08
+│   ├── month09
+│   ├── month10
+│   ├── month11
+│   └── month12
+├── 2018
+│   ├── month01
+│   ├── month02
+│   ├── month03
+│   ├── month04
+│   ├── month05
+│   ├── month06
+│   ├── month07
+│   ├── month08
+│   ├── month09
+│   ├── month10
+│   ├── month11
+│   └── month12
+├── 2019
+│   ├── month01
+│   ├── month02
+│   ├── month03
+│   ├── month04
+│   ├── month05
+│   ├── month06
+│   ├── month07
+│   ├── month08
+│   ├── month09
+│   ├── month10
+│   ├── month11
+│   └── month12
+└── 2020
+    ├── month01
+    ├── month02
+    ├── month03
+    ├── month04
+    ├── month05
+    ├── month06
+    ├── month07
+    ├── month08
+    ├── month09
+    ├── month10
+    ├── month11
+    └── month12
+
+ directories, 0 files
+
 9. *Заполните директории файлами вида ГГГГММДДНН.txt. Внутри файла должно быть имя файла. Например 2018011301.txt, 2018011302.txt.
+
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2/TOTAL$ chmod +x m-y-d.sh
+-rwxrwxr-x  1 hlbu hlbu   79 мар 25 18:08 m-y-d.sh*
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2/TOTAL$ vim m-y-d.sh
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2/TOTAL$ ./m-y-d.sh
+hlbu@hlbu-ubuntu:~/Documents/Lesson_l2/TOTAL$ tree
+.
+├── 2016
+│   ├── month01
+│   │   ├── year2016monthmonth01day01.txt
+│   │   ├── year2016monthmonth01day02.txt
+│   │   ├── year2016monthmonth01day03.txt
+│   │   ├── year2016monthmonth01day04.txt
+│   │   ├── year2016monthmonth01day05.txt
+│   │   ├── year2016monthmonth01day06.txt
+│   │   ├── year2016monthmonth01day07.txt
+│   │   ├── year2016monthmonth01day08.txt
+│   │   ├── year2016monthmonth01day09.txt
+│   │   ├── year2016monthmonth01day10.txt
+│   │   ├── year2016monthmonth01day11.txt
+│   │   ├── year2016monthmonth01day12.txt
+│   │   ├── year2016monthmonth01day13.txt
+│   │   ├── year2016monthmonth01day14.txt
+│   │   ├── year2016monthmonth01day15.txt
+│   │   ├── year2016monthmonth01day16.txt
+│   │   ├── year2016monthmonth01day17.txt
+│   │   ├── year2016monthmonth01day18.txt
+│   │   ├── year2016monthmonth01day19.txt
+│   │   ├── year2016monthmonth01day20.txt
+│   │   ├── year2016monthmonth01day21.txt
+│   │   ├── year2016monthmonth01day22.txt
+│   │   ├── year2016monthmonth01day23.txt
+│   │   ├── year2016monthmonth01day24.txt
+│   │   ├── year2016monthmonth01day25.txt
+│   │   ├── year2016monthmonth01day26.txt
+│   │   ├── year2016monthmonth01day27.txt
+│   │   ├── year2016monthmonth01day28.txt
+│   │   ├── year2016monthmonth01day29.txt
+│   │   ├── year2016monthmonth01day30.txt
+│   │   └── year2016monthmonth01day31.txt
+│   ├── month02
+│   │   ├── year2016monthmonth02day01.txt
+│   │   ├── year2016monthmonth02day02.txt
+
+
+
+в одну строку консоли не получилось заполнить - только через запуск программы с циклом.
+
+
+
+
 10. * Полезное задание на конвейер. Использовать команду cut на вывод длинного списка каталога, чтобы отобразить только права доступа к файлам. Затем отправить в конвейере этот вывод на sort и uniq, чтобы отфильтровать все повторяющиеся строки. Потом с помощью wc посчитать различные типы разрешений в этом каталоге. Самостоятельно решить задачу, как сделать так, чтобы в подсчет не добавлялись строка Итого и файлы . и .. (ссылки на текущую и родительскую директории)
+
+
+hlbu@hlbu-ubuntu:/etc$ ls -lah /etc/ | less | cut -c1-9 | sort -u | grep '^-' |wc -l
+7   # файлы
+hlbu@hlbu-ubuntu:/etc$ ls -lah /etc/ | less | cut -c1-9 | sort -u | grep '^l' |wc -l
+1    #  директории
+hlbu@hlbu-ubuntu:/etc$ ls -lah /etc/ | less | cut -c1-9 | sort -u | grep '^d' |wc -l
+2     #
+
 Примечание. Задания с 7 по 10 даны для тех, кому упражнений 1-6 показалось недостаточно.
