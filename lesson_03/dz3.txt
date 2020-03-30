@@ -1,0 +1,137 @@
+1. Создать файл file1 и наполнить его произвольным содержимым. Скопировать его в file2. Создать символическую ссылку file3 на file1. Создать жесткую ссылку file4 на file1. Посмотреть, какие айноды у файлов. Удалить file1. Что стало с остальными созданными файлами? Попробовать вывести их на экран.
+hlbu@hlbu-ubuntu:~/lesson_16$ echo hello 3 home work! >dz3_hw.txt
+hlbu@hlbu-ubuntu:~/lesson_16$ cat dz3_hw.txt
+hello 3 home work!
+hlbu@hlbu-ubuntu:~/lesson_16$ cat dz3_hw.txt > dz3.1_hw.txt
+hlbu@hlbu-ubuntu:~/lesson_16$ cat dz3.1_hw.txt
+hello 3 home work!
+
+hlbu@hlbu-ubuntu:~/lesson_16/dz3$ ls -li
+total 12
+ 924822 -rw-rw-r-- 2 hlbu hlbu 19 мар 27 22:29 file1.txt
+ 929759 -rw-rw-r-- 1 hlbu hlbu 19 мар 27 22:30 file2.txt
+1183774 lrwxrwxrwx 1 hlbu hlbu  9 мар 27 22:40 file3.txt -> file1.txt
+ 924822 -rw-rw-r-- 2 hlbu hlbu 19 мар 27 22:29 file4.txt
+hlbu@hlbu-ubuntu:~/lesson_16/dz3$ rm file1.txt
+hlbu@hlbu-ubuntu:~/lesson_16/dz3$ ll
+total 16
+drwxrwxr-x 2 hlbu hlbu 4096 мар 27 22:43 ./
+drwxrwxr-x 5 hlbu hlbu 4096 мар 27 22:34 ../
+-rw-rw-r-- 1 hlbu hlbu   19 мар 27 22:30 file2.txt
+lrwxrwxrwx 1 hlbu hlbu    9 мар 27 22:40 file3.txt -> file1.txt # после удалени я файла ссылка мягкая стала не активна , а вторая ссылка (файл с содержимым осталась)
+-rw-rw-r-- 1 hlbu hlbu   19 мар 27 22:29 file4.txt
+hlbu@hlbu-ubuntu:~/lesson_16/dz3$
+
+2. Дать созданным файлам другие, произвольные имена. Создать новую символическую ссылку. Переместить ссылки в другую директорию.
+hlbu@hlbu-ubuntu:~/dz3$ ln -s /home/hlbu/dz3/file1.txt mylnk
+hlbu@hlbu-ubuntu:~/dz3$ ll
+total 12s
+drwxrwxr-x  2 hlbu hlbu 4096 мар 27 23:38 ./
+drwxr-xr-x 28 hlbu hlbu 4096 мар 27 23:26 ../
+-rw-rw-r--  1 hlbu hlbu   10 мар 27 23:27 file1.txt
+lrwxrwxrwx  1 hlbu hlbu   24 мар 27 23:38 mylnk -> /home/hlbu/dz3/file1.txt
+hlbu@hlbu-ubuntu:~/dz3$ mv mylnk ~/Desktop/
+
+
+3. Создать два произвольных файла. Первому присвоить права на чтение, запись для владельца и группы, только на чтение для всех. Второму присвоить права на чтение, запись только для владельца. Сделать это в численном и символьном виде.
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ touch file{1,2}.txt
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ ll
+total 8
+drwxrwxr-x 2 hlbu hlbu 4096 мар 28 00:45 ./
+drwxrwxr-x 3 hlbu hlbu 4096 мар 28 00:43 ../
+-rw-rw-r-- 1 hlbu hlbu    0 мар 28 00:45 file1.txt
+-rw-rw-r-- 1 hlbu hlbu    0 мар 28 00:45 file2.txt
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ chmod 664 file1.txt
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ chmod 600 file2.txt
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ ll
+total 8
+drwxrwxr-x 2 hlbu hlbu 4096 мар 28 00:45 ./
+drwxrwxr-x 3 hlbu hlbu 4096 мар 28 00:43 ../
+-rw-rw-r-- 1 hlbu hlbu    0 мар 28 00:45 file1.txt
+-rw------- 1 hlbu hlbu    0 мар 28 00:45 file2.txt
+
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ ll
+total 8
+
+-rw-rw-r-- 1 hlbu hlbu    0 мар 28 00:45 file2.txt
+
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ chmod g-wr,o-r file2.txt
+hlbu@hlbu-ubuntu:~/dz3/dz3.3$ ll
+
+-rw------- 1 hlbu hlbu    0 мар 28 00:45 file2.txt
+
+
+
+
+4. Создать пользователя, обладающего возможностью выполнять действия от имени суперпользователя.
+
+
+ 
+/etc/sudoers но я не совсем понял как ? на занятии неизучали .например так:
+hlbu@hlbu-ubuntu:~$ sudo vim /etc/sudoers
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+petrov  ALL=(ALL:ALL) ALL # после создания группы и юзера petrov  добавляем запись в файл /etc/sudoers
+
+или 
+usermod -aG sudo petrov # в группу sudo
+
+
+5. * Создать группу developer, несколько пользователей, входящих в эту группу. Создать директорию для совместной работы. Сделать так, чтобы созданные одними пользователями файлы могли изменять другие пользователи этой группы.
+под рутом делаем
+1.  создаем группу $ groupadd students
+2. елаем общую папку students_shared
+3. добавляем в пермисий sudo chmod 775  students_shared
+4. закидываем  в группу пользователей 
+5. меняем файлы др. пользователями (а вот тут не вышло)
+hlbu@hlbu-ubuntu:~$ logout
+root@hlbu-ubuntu:~#
+root@hlbu-ubuntu:~# su - petrov
+petrov@hlbu-ubuntu:~$  sudo -i
+[sudo] password for petrov:
+root@hlbu-ubuntu:~# su - petrov
+petrov@hlbu-ubuntu:~$
+petrov@hlbu-ubuntu:~$
+petrov@hlbu-ubuntu:~$ echo asdzzzzzzz >>/mnt/student_share/hlbu_qwe.txt
+-su: /mnt/student_share/hlbu_qwe.txt: Permission denied
+
+
+
+6. * Создать в директории для совместной работы поддиректорию для обмена файлами, но чтобы удалять файлы могли только их создатели.
+petrov@hlbu-ubuntu:~$ cd /mnt/student_share/shared_files/
+petrov@hlbu-ubuntu:/mnt/student_share/shared_files$ ll
+total 8
+drwxr-xr-x 2 hlbu   studends 4096 мар 30 12:24 ./
+drwxrwxr-x 3 root   studends 4096 мар 30 10:49 ../
+-rw-rw-r-- 1 hlbu   studends    0 мар 30 12:19 h2.txt
+-rw-rw-r-- 1 hlbu   studends    0 мар 30 12:19 h3.txt
+-rw-rw-r-- 1 hlbu   studends    0 мар 30 12:19 h4.txt
+-rw-rw-r-- 1 petrov studends    0 мар 30 11:33 p3.txt
+-rw-rw-r-- 1 petrov studends    0 мар 30 11:33 p4.txt
+petrov@hlbu-ubuntu:/mnt/student_share/shared_files$ cd ..
+petrov@hlbu-ubuntu:/mnt/student_share$ rm ./shared_files/h2.txt
+rm: cannot remove './shared_files/h2.txt': Permission denied
+petrov@hlbu-ubuntu:/mnt/student_share$ rm ./shared_files/p3.txt
+rm: cannot remove './shared_files/p3.txt': Permission denied
+petrov@hlbu-ubuntu:/mnt/student_share$
+
+Везде вообще установил одну группу. Подумал что достаточно в данной папке сделать пермисию 755. но нет. в итоге даже petrov не может удалять собственные файлы. А г лавный hlbu может все.
+
+
+7. * Создать директорию, в которой есть несколько файлов. Сделать так, чтобы открыть файлы можно только, зная имя файла, а через ls список файлов посмотреть нельзя.
+
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ mkdir -p dz_3.77/petrov_folder/
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ cd ./dz_3.77/petrov_folder/
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ touch f{1..3}.txt
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ chmod 375 ~/dz_3.77/petrov_folder/
+
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ ll
+ls: cannot open directory '.': Permission denied
+
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ echo hello world > ~/dz_3.77/petrov_folder/f1.txt
+
+petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ cat ~/dz_3.77/petrov_folder/f1.txt
+hello world
+
+
+
