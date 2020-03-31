@@ -134,4 +134,15 @@ petrov@hlbu-ubuntu:~/dz_3.77/petrov_folder$ cat ~/dz_3.77/petrov_folder/f1.txt
 hello world
 
 
+7 - lsof +d /dev/ -a -u buranov
 
+
+8 - mkdir -p ./{2015..2020}/{01..12}
+
+
+
+9 - for y in {2015..2020}; do for m in {01..12}; do for d in {01..31}; do for i in {01..10}; do mkdir -p ./$y/$m; echo $y$m$d$i.txt> ./$y/$m/$y$m$d$i.txt; done; done; done; done
+
+
+
+10 - ls -l A| grep -v ^итого | cut -c2-10 | sort  | uniq
