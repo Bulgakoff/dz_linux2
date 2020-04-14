@@ -1,0 +1,355 @@
+Видит уже установленные файлы
+
+root@hlbu-ubuntu:~# dpkg -l | grep ^ii | wc -l
+1664
+root@hlbu-ubuntu:~# dpkg -l | grep ngingx
+root@hlbu-ubuntu:~# dpkg -l | grep nginx
+rc  libnginx-mod-http-geoip                    1.14.0-0ubuntu1.7                               amd64        GeoIP HTTP module for Nginx
+rc  libnginx-mod-http-image-filter             1.14.0-0ubuntu1.7                               amd64        HTTP image filter module for Nginx
+rc  libnginx-mod-http-xslt-filter              1.14.0-0ubuntu1.7                               amd64        XSLT Transformation module for Nginx
+rc  libnginx-mod-mail                          1.14.0-0ubuntu1.7                               amd64        Mail module for Nginx
+rc  libnginx-mod-stream                        1.14.0-0ubuntu1.7                               amd64        Stream module for Nginx
+ii  nginx                                      1.16.1-1~xenial                                 amd64        high performance web server
+rc  nginx-common                               1.14.0-0ubuntu1.7                               all          small, powerful, scalable web/proxy server - common files
+
+
+апаче2 у себя:
+root@hlbu-ubuntu:~# dpkg -l | grep apache
+ii  apache2                                    2.4.29-1ubuntu4.13                              amd64        Apache HTTP Server
+ii  apache2-bin                                2.4.29-1ubuntu4.13                              amd64        Apache HTTP Server (modules and other bina
+
+ПОИСК В ПОТЕНЦИАЛЬНОГО ОБЪЕКТА (ПРОГРАММЫ СКЕЕРВЕРА):
+root@hlbu-ubuntu:~# apt-cache search
+	ДО ЧРЕНА ВЫЛЕЗЛО:
+root@hlbu-ubuntu:~# apt-cache search server
+aodh-api - OpenStack Telemetry (Ceilometer) Alarming - API server
+apache2 - Apache HTTP Server
+apache2-bin - Apache HTTP Server (modules and other binary files)
+apache2-data - Apache HTTP Server (common files)
+Ю....................
+root@hlbu-ubuntu:~# apt-cache search server | wc -l
+6701
+
+ВЕБ-СЕРВЕР ЭТО РАБОТА ПО http А ЧТО УНАС ЕСТЬ ПО http?
+tcpwatch-httpproxy - TCP monitoring and logging tool with support for HTTP 1.1
+tidy-proxy - small http proxy which tidies html
+root@hlbu-ubuntu:~# apt-cache search server | grep http | wc -l
+119
+ТОЖЕ МНОГО ЮЮ......
+
+ПРЕВОД В less
+root@hlbu-ubuntu:~# apt-cache search server | grep http | less
+
+python-pytest-httpbin - py.test plugin providing a local httpbin
+python3-aiohttp - http client/server for asyncio
+python3-aiohttp-cors - Cross Origin Resource Sharing (CORS) support for aiohttp
+python3-aiohttp-dbg - http client/server for asyncio - debug version
+/http
+
+...
+
+СМОТРИМ apache:
+
+root@hlbu-ubuntu:~# apt-cache search server | grep http | grep -i apache
+libapache2-mod-svn - Apache Subversion server modules for Apache httpd
+НЕ ОСОБО НАШЕЛ 
+ПОПРОБУЕМ СРАЗУ НА ПЕРВОЙ СТУПЕНИ  Apache ПОИСКАТЬ :
+
+tomcat9-examples - Apache Tomcat 9 - Servlet and JSP engine -- example web applications
+tomcat9-user - Apache Tomcat 9 - Servlet and JSP engine -- tools to create user instances
+root@hlbu-ubuntu:~# apt-cache search server | grep -i apache | WC -L
+WC: command not found
+root@hlbu-ubuntu:~# apt-cache search server | grep -i apache | wc -l
+126
+ПЕРЕВОДИ М В ЛЕСС:
+ВИДИМ ЧТО НУЖНО ИГНОРИРОВАНИЕ РЕГИСТРА -i:
+
+root@hlbu-ubuntu:~# apt-cache search server | grep -i http | grep -i apache
+apache2 - Apache HTTP Server
+apache2-bin - Apache HTTP Server (modules and other binary files)
+apache2-data - Apache HTTP Server (common files)
+apache2-dev - Apache HTTP Server (development headers)
+apache2-doc - Apache HTTP Server (on-site documentati
+..............
+............... 
+
+libapache2-mod-evasive - evasive module to minimize HTTP DoS or brute force attacks
+libapache2-mod-svn - Apache Subversion server modules for Apache httpd
+python-mod-pywebsocket - WebSocket extension for Apache HTTP Server
+root@hlbu-ubuntu:~# apt-cache search server | grep -i http | grep -i apache | wc -l
+12
+
+КАК ПОНЯТЬ ЧТО УСТАНОВЛЕНО И ЧТО РАБОТАЕТ :
+
+root@hlbu-ubuntu:~# netstat -tnlp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      823/mysqld
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      1094/nginx: master
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      401/systemd-resolve
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      765/sshd
+tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      2314/cupsd
+tcp6       0      0 :::8080                 :::*                    LISTEN      772/apache2
+tcp6       0      0 :::22                   :::*                    LISTEN      765/sshd
+..ЮЮЮЮЮЮЮЮЮЮЮЮЮЮЮЮЮ.................
+..................................
+
+ПО УМОЛЧАНИЮ ИДЕТ 80 ПОРТ
+
+
+А ПОНЯТЬ НАСКОЛЬКО РАБОТАЕТ ЧТО ТО:
+root@hlbu-ubuntu:~# systemctl status apache2
+● apache2.service - The Apache HTTP Server
+   Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+  Drop-In: /lib/systemd/system/apache2.service.d
+           └─apache2-systemd.conf
+   Active: active (running) since Fri 2020-04-10 09:28:42 MSK; 1h 57min ago
+..............
+..............
+ЕСЛИ НУЖНО ОСТАНОВИТЬ :
+systemctl stop apache2
+и затем :
+root@hlbu-ubuntu:~# systemctl start apache2
+
+Потоки или процессы - это механизм параллельной обработки запросов для сессий, чтобы в разных сессиях отображалась различная информация, самый простой пример это поисковый сервер, он ищет одновременно для огромного количества клиентов информацию, но при этом каждый клиент (сессия) получает только то что он запросил.
+
+ поток - это кусок кода исполнение. Процесс - это структура я ядре, в которой этот код живет. при этом параллельно могут запускаться несколько кусков кода (трэдов) и они внутри одного процесса шарят между собой ресурсы, память. это не только для веб сервера, это для всех программ
+
+ЧТО БЫ ПОСМОТРЕТЬ КАК РАБОТАЕТ ПРОЦЕСС:
+root@hlbu-ubuntu:~# ps -fel
+
+ЮЮ...........
+..........
+...........
+4 S root      3166   579  0  80   0 -  6497 poll_s 13:56 ?        00:00:00 /sbin/dhclient -d
+1 I root      3180     2  0  80   0 -     0 worker 13:56 ?        00:00:00 [kworker/u2:1-ev]
+1 I root      3185     2  0  80   0 -     0 worker 14:03 ?        00:00:00 [kworker/u2:2-ev]
+0 R root      3187  2440  0  80   0 - 11118 -      14:03 pts/1    00:00:00 ps -fel
+root@hlbu-ubuntu:~# ps -fel | wc -l
+163
+
+ЧТОБ ПОСМОТРЕТЬ НАЧАЛО 
+
+root@hlbu-ubuntu:~# ps -fel | head -4
+F S UID        PID  PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY          TIME CMD
+4 S root         1     0  0  80   0 - 39984 ep_pol 09:28 ?        00:00:02 /sbin/init splas
+1 S root         2     0  0  80   0 -     0 kthrea 09:28 ?        00:00:00 [kthreadd]
+1 I root         3     2  0  60 -20 -     0 rescue 09:28 ?        00:00:00 [rcu_gp]
+...............
+
+Е ДЕЛАЕМ ДЛЯ ТОГО ЧТО БЫ ПОНЯТЬ НА ОСНОВЕ ЧЕГО РАБОТАЕТ ИСКОМЫЙ КОНФИГ
+root@hlbu-ubuntu:~# man apache2 | less
+root@hlbu-ubuntu:~# ll /etc/apache2/apache2.conf
+-rw-r--r-- 1 root root 7224 мар 13 15:26 /etc/apache2/apache2.conf
+
+есть главный конфиг ЗАХОДИМ В НЕГО
+root@hlbu-ubuntu:~# less /etc/apache2/apache2.conf
+ ВСЕ ЛИШНЕЕ УДАЛЯЕМ ПОДСЧИТАВ
+root@hlbu-ubuntu:~# wc -l /etc/apache2/apache2.conf
+227 /etc/apache2/apache2.conf
+
+ФИЛТРУЕМ КОНФИГ КАК РАБОТАТЬ НАШЕМУ ВЕБ СЕРВЕРУ
+root@hlbu-ubuntu:~# grep -v -P "^.*#" /etc/apache2/apache2.conf | grep -v -P "^$" | wc -l
+39
+root@hlbu-ubuntu:~# grep -v -P "^.*#" /etc/apache2/apache2.conf | grep -v -P "^$" | less
+root@hlbu-ubuntu:~#
+ 
+ОТФИЛЬТРОВАЛИ И ЛУЧШЕ СДЕЛАТЬ ОТДЕЛЬНЫЙ ФАЙЛ  И ПОНЕ ТОГДА И ЛАЗИИМ
+
+root@hlbu-ubuntu:~# cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.def
+root@hlbu-ubuntu:~# ll /etc/apache2/apache2.conf.def
+-rw-r--r-- 1 root root 7224 апр 10 14:44 /etc/apache2/apache2.conf.def
+root@hlbu-ubuntu:~# grep -v -P "^.*#" /etc/apache2/apache2.conf.def > /etc/apache2/apache2.conf
+root@hlbu-ubuntu:~# less /etc/apache2/apache2.conf
+
+
+ПРоБУЕМ ОПРЕДЕЛИТЬ ПОЛЬЗОВАТЕЛЯ..... UID В ps -fel
+
+root@hlbu-ubuntu:~# ps -fel | head -2
+F S UID        PID  PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY          TIME CMD
+4 S root         1     0  0  80   0 - 39984 ep_pol 09:28 ?        00:00:02 /sbin/init splash
+root@hlbu-ubuntu:~# ps -fel | grep apache2
+1 S root      2801     1  0  80   0 - 103830 poll_s 11:29 ?       00:00:00 /usr/sbin/apache2 -k start
+5 S www-data  2802  2801  0  80   0 - 104931 inet_c 11:29 ?       00:00:00 /usr/sbin/apache2 -k start
+ЭТО www-data
+root@hlbu-ubuntu:~# id www-data
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+ 
+ДО 1000 uid - ЭТО ПОЛЬЗОВАТЕТЬ -ДЕМОН
+но в конфиге этого ползователя нет (описан по другому)
+User ${APACHE_RUN_USER}
+
+НАЧИНАЕМ ПОИСК ЭТОГО ПОЛЬЗОВАТЕЛЯ
+root@hlbu-ubuntu:~# grep -r APACHE_RUN_USER /etc/
+/etc/init.d/apache-htcacheclean:RUN_USER=$(. $APACHE_CONFDIR/envvars > /dev/null && echo "$APACHE_RUN_USER")
+/etc/apache2/envvars:export APACHE_RUN_USER=www-data
+/etc/apache2/apache2.conf:User ${APACHE_RUN_USER}
+/etc/apache2/apache2.conf.def:User ${APACHE_RUN_USER}
+root@hlbu-ubuntu:~#
+остаЕТСЯ ТОЛЬКО /etc/apache2/envvars: СМОТРИМ СЮДА
+less /etc/apache2/envvars 
+НАШЛИ 
+export APACHE_RUN_USER=www-data
+НО КАКОГО ЛЯДА ОН ТАК ЛЕЖИТ В /etc/apache2/envvars А НЕ В КОНФИГЕ?????????????
+0,52
+ВЕДЕМ ПОИСК ПО ВСЕМ ВЛОЖЕННЫМ КАТАЛОГАМ grep -r <..........>
+root@hlbu-ubuntu:~# grep -r envars /etc/apache2/
+root@hlbu-ubuntu:~# grep -r envars /etc/
+root@hlbu-ubuntu:~# grep -r envvars /etc/apache2/
+/etc/apache2/envvars:# envvars - default environment variables for apache2ctl
+/etc/apache2/apache2.conf.def:# This needs to be set in /etc/apache2/envvars
+..................
+
+ИЩЕМ ПОРТ 
+
+root@hlbu-ubuntu:~# grep -r 80 /etc/apache2/
+/etc/apache2/magic:1080 string  M.K.            audio/x-mod
+/etc/apache2/magic:1080 string  M!K!            audio/x-mod
+/////.......... 
+много	много
+root@hlbu-ubuntu:~# grep -r 80 /etc/apache2/ | grep -i port
+/etc/apache2/ports.conf:Listen 8080
+ЁНАШЛИ
+НУ И ЗАГЛЯНЕМ  В НЕГО 
+less 
+ПОСМОТРИМ ГДЕ КОНФ port.conf уПОМИНАЕТСЯ 
+ВСЕ МОЖНО ПОПРОБОВАТЬ ЗАМЕНИТЬ ПОРТ  80 НА 8080 
+И ЗАТЕМ systemctl reload (restart)<.....>
+
+NGINX######################
+root@hlbu-ubuntu:~# apt-cache search nginx |wc -l
+83
+МНОГО 
+root@hlbu-ubuntu:~# dpkg -l | grep nginx
+rc  libnginx-mod-http-geoip                    1.14.0-0ubuntu1.7                               amd64        GeoIP HTTP module for Nginx
+rc  libnginx-mod-http-image-filter             1.14.0-0ubuntu1.7                               amd64        HTTP image filter module for Nginx
+ЧТОТО УСТАНОВИЛОСЬ
+root@hlbu-ubuntu:~# systemctl status nginx
+● nginx.service - nginx - high performance web server
+   Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
+   Active: active (running) since Fri 2020-04-10 09:28:50 MSK; 12h ago
+
+ЗАХОДИМ УЖЕ В КОНФ nginxconf
+
+ЗАНИМАЕМСЯ СТОРОНО	 САЙТОВ 
+root@hlbu-ubuntu:~# less /etc/apache2/sites-enabled/000-default.conf | grep -v -P "^.*#" | less
+<VirtualHost *:80>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+root@hlbu-ubuntu:~# vim /etc/nginx/nginx.conf
+   include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*.conf;
+ТО ЗНАЧИТ ВЛЮЧИТЬ В СЕБЯ В nginx.conf ВСЕ ФАЙЛЫ ДЛЯ ИСПОЛННИЯ С РАШИРЕРНИЕМ *.conf
+
+	ТУТ ПРОПУЩЕНЫ ДЕЙСТВИЯ ПО СОЗДАНИЮ ПАПАК ФАЙЛОВ ДЛЯ САЙТОВ ИЗМЕНЕНИЮ ИХ СОДЕРЖИМОГО ПО ПОРТАМ
+ И ДАЛЬШЕ ЛИНКУЕМ САЙТЫ
+
+root@hlbu-ubuntu:~# a2ensite 8080
+Enabling site 8080.
+To activate the new configuration, you need to run:
+  systemctl reload apache2
+root@hlbu-ubuntu:~# ls -l /etc/apache2/sites-enabled/
+total 0
+lrwxrwxrwx 1 root root 28 апр 11 11:03 8080.conf -> ../sites-available/8080.conf
+root@hlbu-ubuntu:~# cd /etc/apache2/sites-enabled/
+root@hlbu-ubuntu:/etc/apache2/sites-enabled# ln -s ../sites-available/8081.conf
+root@hlbu-ubuntu:/etc/apache2/sites-enabled# ln -s ../sites-available/8082.conf
+root@hlbu-ubuntu:/etc/apache2/sites-enabled# ll
+total 8
+drwxr-xr-x 2 root root 4096 апр 11 11:40 ./
+drwxr-xr-x 8 root root 4096 апр 11 09:57 ../
+lrwxrwxrwx 1 root root   28 апр 11 11:03 8080.conf -> ../sites-available/8080.conf
+lrwxrwxrwx 1 root root   28 апр 11 11:39 8081.conf -> ../sites-available/8081.conf
+lrwxrwxrwx 1 root root   28 апр 11 11:40 8082.conf -> ../sites-available/8082.conf
+
+
+
+curlОМ ПРОВЕРЯЕМ КОННЕКТ
+
+root@hlbu-ubuntu:~# curl 127.0.0.1:8080 | grep 8080
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0    <title>Apache2 (8080) Ubuntu Default Page: It works</title>
+          Apache2 (8080) Ubuntu Default Page
+100 10932  100 10932    0     0  1334k      0 --:--:-- --
+
+
+СОЗДАЕМ ПОТОКИ ОТ nginx ДО АПАЧЕ
+root@hlbu-ubuntu:~# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/
+
+root@hlbu-ubuntu:~# vim /etc/nginx/sites-available/upstream
+
+РЕАЛИЗУЕМ ПОДКЛЮЧЕНИЕ ПОРТОВ 
+root@hlbu-ubuntu:~# ln -s /etc/nginx/sites-available/upstream /etc/nginx/sites-enabled/upstr
+
+root@hlbu-ubuntu:~# ls -l /etc/nginx/sites-enabled/                             total 0
+lrwxrwxrwx 1 root root 34 апр  9 18:41 default -> /etc/nginx/sites-available/default
+lrwxrwxrwx 1 root root 35 апр 11 15:17 upstr -> /etc/nginx/sites-available/upstream
+
+rroot@hlbu-ubuntu:~# systemctl reload nginx.service
+
+
+root@hlbu-ubuntu:~# vim /etc/nginx/sites-available/default
+
+  location / {
+                # First attempt to serve request as file, then
+                # as directory, then fall back to displaying a 404.
+                try_files $uri $uri/ =404;
+                proxy_pass http://apache;
+        }
+
+
+ДЕРГАЕМ curlом
+80 порт
+ ОБЩАЯ ИНФА
+
+root@hlbu-ubuntu:~# cat /etc/hosts
+127.0.0.1       localhost
+127.0.1.1       hlbu-ubuntu
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+root@hlbu-ubuntu:~# nslookup localhost
+Server:         127.0.0.53
+Address:        127.0.0.53#53
+
+Non-authoritative answer:
+Name:   localhost
+Address: 127.0.0.1
+Name:   localhost
+Address: ::1
+
+
+
+
+upstream apache2 {
+            server 127.0.0.1:8080;
+            server 127.0.0.1:8081;
+            server 127.0.0.1:8080;
+}
+
+server {
+     listen 80;
+     listen i[::]:80;
+     server_name http://192.168.0.17
+     location / {
+           proxy_pass http://apache2;
+     }
+
+}
+
