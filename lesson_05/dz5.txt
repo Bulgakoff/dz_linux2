@@ -1,0 +1,90 @@
+1. На скрипты:
+a) Написать скрипт, который удаляет из текстового файла пустые строки и заменяет маленькие символы на большие (воспользуйтесь tr или sed).
+
+hlbu@hlbu-ubuntu:~/linux_gb2/dz5$ cat dz5.1a.txt | sed '/^$/d' | tr '[:lower:]' '[:upper:]' > dz5.1aaaa.txt
+hlbu@hlbu-ubuntu:~/linux_gb2/dz5$ cat dz5.1aaaa.txt
+
+#!/bin/bash
+
+
+for p in d*txt
+do
+        cat $p | sed '/^$/d' | tr '[:lower:]' '[:upper:]'> qwe1.txt
+done
+
+WHAT IS LOREM IPSUM?
+LOREM IPSUM IS SIMPLY DUMMY
+A TEXT OF THE PRINTING AND TYPESETTING INDUSTRY. LOREM IPSUM HAS BEEN THE INDUSTRY'S STANDARD DUMMY TEXT EVER SINCE THE 1500S, WHEN AN UNKNOWN
+ PRINTER TOOK A GALLEY OF TYPE AND SCRAMBLED IT TO MAKE A TYPE SPECIMEN BOOK. IT HAS SURVIVED NOT ONLY FIVE CENTURIES, BUT ALSO THE LEAP INTO
+ ELECTRONIC TYPESETTING, REMAINING ESSENTIALLY UNCHANGED. IT WAS
+ POPULARISED IN THE 1960S WITH THE RELEASE OF LETRASET SHEETS CONTAINING LOREM IPSUM PASSAGES, AND MORE RECENTLY WITH DESKTOP PUBLISHING SOFTWARE LIKE ALDUS PAGEMAKER INCLUDING VERSIONS OF LOREM IPSUM.
+
+
+b) Изменить скрипт мониторинга лога, чтобы он выводил сообщения при попытке неудачной аутентификации пользователя /var/log/auth.log, отслеживая сообщения примерно такого вида:
+
+Apr  5 15:30:56 hlbu-ubuntu login[2942]: FAILED LOGIN (1) on '/dev/tty3' FOR 'hlbu', Authentication failure
+
+
+Проверить скрипт, выполнив ошибочную регистрацию с виртуального терминала.
+hlbu@hlbu-ubuntu:~/linux_gb2/dz5$ crontab -e
+crontab: installing new crontab
+
+#
+# m h  dom mon dow   command
+# TEST
+
+35 17 05 04 * ls -l /var/log/ | grep -P 'a..h\....$' | cat /var/log/auth.log | grep -P '([A-Z]+\ ){2}' >> ~/linux_gb2/dz5/1b.txt
+
+
+c) Создать скрипт, который создаст директории для нескольких годов (2010 — 2017), в них — поддиректории для месяцев (от 01 до 12), и в каждый из них запишет несколько файлов с произвольными записями (например 001.txt, содержащий текст Файл 001, 002.txt с текстом Файл 002) и т.д.
+
+hlbu@hlbu-ubuntu:~/linux_gb2/lesson5_bash/dir$ for y in year20{15..20}; do for m in {01..12}; do mkdir -p ./$y/$m; for d in day{01..05}; do echo hollyday$m$d >> ./$y/$m/files$m$d.txt; done; done; done
+hlbu@hlbu-ubuntu:~/linux_gb2/lesson5_bash/dir$ tree
+.
+├── year2015
+│   ├── 01
+│   │   ├── files01day01.txt
+│   │   ├── files01day02.txt
+│   │   ├── files01day03.txt
+│   │   ├── files01day04.txt
+│   │   └── files01day05.txt
+│   ├── 02
+│   │   ├── files02day01.txt
+│   │   ├── files02day02.txt
+│   │   ├── files02day03.txt
+
+
+2. * Более сложные задания на скрипты (и cron):
+Создать файл crontab, который ежедневно регистрирует занятое каждым пользователем дисковое пространство в его домашней директории.
+ТОЛЬКО ПОЧЕМУТО НЕ ОТРАБОТАЛ
+# m h  dom mon dow   command
+
+43 22 * * * echo home takes : >> ~/linux_gb2/dz5/1b.txt
+50 22 * * * du -sh /home/ >> ~/linux_gb2/dz5/1b.txt
+
+30 22 * * * echo user1 takes :  >> 1b.txt
+30 22 * * * du -sh /home/user1/ >> 1b.txt
+
+30 21 * * * echo user2 takes : >> 1b.txt
+30 21 * * * du -sh /home/user2/ >> 1b.txt
+
+
+30 21 * * * echo user3 takes : >> 1b.txt
+30 21 * * * du -sh /home/user3/ >> 1b.txt
+
+
+Создать скрипт ownersort.sh, который в заданной папке копирует файлы в директории, названные по имени владельца каждого файла. Учтите, что файл должен принадлежать соответствующему владельцу
+
+hlbu@hlbu-ubuntu:~$ cat /etc/passwd | grep -P '^.+:?:[0-9]{4,6}::.*home.+$'
+user1:x:1001:1002::/home/user1:/bin/bash
+user2:x:1002:1003::/home/user2:/bin/bash
+user3:x:1003:1004::/home/user3:/bin/bash
+
+hlbu@hlbu-ubuntu:~$ cat /etc/passwd | grep -P '^.+:?:[0-9]{4,6}::.*home.+$' | wc -l
+3
+
+
+
+Написать скрипт rename.sh, аналогичный разобранному, но порядковые номера файлов выравнивать, заполняя слева нуля до ширины максимального значения индекса: newname000.jpg, newname102.jpg (Использовать printf). Дополнительно к 3 добавить проверку на расширение, чтобы не переименовать .sh.
+Написать скрипт резервного копирования по расписанию следующим образом: В первый день месяца помещать копию в backdir/montlhy. Бэкап по пятницам хранить в каталоге backdir/weekley. В остальные дни сохранять копии в backdir/daily. Настроить ротацию следующим образом. Ежемесячные копии хранить 180 дней, ежедневные — неделю, еженедельные — 30 дней. Подсказка: для ротации используйте find.
+Примечание. Задание 2 дано для тех, кому упражнения 1 показалось недостаточно.
