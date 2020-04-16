@@ -1,0 +1,283 @@
+ПОДТЯНУТЬ НОВЫЕ ВЕРСИИ
+
+root@hlbu-ubuntu:~# docker pull nginx
+Using default tag: latest
+latest: Pulling from library/nginx
+c499e6d256d6: Pull complete
+
+ПРОСМОТРСКАЧАННЫХ ВЕРСИЙ
+root@hlbu-ubuntu:~# docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+
+
+root@hlbu-ubuntu:~# docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+
+ВОПРОС НЕ (Ошибка ответа от демона: драйвер не смог запрограммировать внешнее соединение на конечной точке)
+root@hlbu-ubuntu:~#  docker run -d -p 80:80 nginx
+
+a7110bf014856796a53d4195e69005cd70196fb439c81f674e616c23f3cca22e
+docker: Error response from daemon: driver failed programming external connectivity on endpoint kind_ishizaka (4e10d58ad14d39c95e3b0675c7aa49aff7de18732fda472d70a8577f242b9af7): Error starting userland proxy: listen tcp 0.0.0.0:80: bind: address already in use.
+
+root@hlbu-ubuntu:~# docker run -d --name nginx -p 80:80 -v /var/www/html:/usr/share/nginx/html nginx
+3c05774e85e4f51458fd8356b2a558da5691eea4b719b4c4812f6bf44f486f10
+docker: Error response from daemon: driver failed programming external connectivity on endpoint nginx (5f8e321bc4030d517ada056729f8719adadd4f978b8e996b67ce769150d3c4c3): Error starting userland proxy: listen tcp 0.0.0.0:80: bind: address already in use.
+
+ЭТАПЫ  
+root@hlbu-ubuntu:~# docker search nginx
+NAME                               DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+nginx                              Official build of Nginx.                        12976               [OK]
+jwilder/nginx-proxy                Automated Ngin
+
+
+root@hlbu-ubuntu:~# docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+
+КАЧАЕМ СВЕЖАК: 
+root@hlbu-ubuntu:~# docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+mysql               latest              9228ee8bac7a        2 weeks ago         547MB
+hello-world         latest              fce289e99eb9        15 months ago       1.84kB
+И ОБЛОМ::
+
+root@hlbu-ubuntu:~# docker run -d -p 80:80 nginx
+4377a52aed8f8df086ab48d282d0ebddb396bb5de1d03cf3a6d25bd12d4a6a64
+root@hlbu-ubuntu:~# netstat -tnlp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      775/mysqld
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      424/systemd-resolve
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      717/sshd
+tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      2031/cupsd
+tcp6       0      0 :::80                   :::*                    LISTEN      2829/docker-proxy
+tcp6       0      0 :::8080                 :::*                    LISTEN      747/apache2
+tcp6       0      0 :::8081                 :::*                    LISTEN      747/apache2
+tcp6       0      0 :::8082                 :::*                    LISTEN      747/apache2
+tcp6       0      0 :::22                   :::*                    LISTEN      717/sshd
+tcp6       0      0 ::1:631                 :::*                    LISTEN      2031/cupsd
+root@hlbu-ubuntu:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                NAMES
+4377a52aed8f        nginx               "nginx -g 'daemon of…"   About a minute ago   Up About a minute   0.0.0.0:80->80/tcp   objective_tesla
+root@hlbu-ubuntu:~#
+
+ВХОДД В ДОКЕР
+root@hlbu-ubuntu:~# docker exec -ti 4377a52aed8f bash
+root@4377a52aed8f:/# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+ГДЕ ЛЕЖИТ ЧТО 
+
+root@4377a52aed8f:/# type nginx
+nginx is /usr/sbin/nginx
+
+МНОГО ЛИШНЕНГО В ДОКЕРЕ ЛЕЖИТ 
+ДОКЕР НУЖЕН КАК ИНСТРУМЕНТ ПОРТИРОВАНИЯ СБОРОК , НО НЕ КАК ВИРТУАЛЬНАЯ МАШИНА
+СНОВА  ОСТАНОВИТЬ -УДАЛИТЬ ЗАПУСТИТЬ 
+root@hlbu-ubuntu:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                NAMES
+4377a52aed8f        nginx               "nginx -g 'daemon of…"   About an hour ago   Up About an hour    0.0.0.0:80->80/tcp   objective_tesla
+root@hlbu-ubuntu:~# docker stop 4377a52aed8f
+4377a52aed8f
+root@hlbu-ubuntu:~# docker rm 4377a52aed8f
+4377a52aed8f
+root@hlbu-ubuntu:~# docker run -d -p 80:80 nginx
+6fbf7273a883905457d1ebee5b6ad23f1351e84aa4d8146f05ae19dbffda03fe
+root@hlbu-ubuntu:~# iptables-save
+# Generated by iptables-save v1.6.1 on Wed Apr 15 11:14:32 2020
+*filter
+:INPUT ACCEPT [44:2932]
+
+
+И ПОСМОТРЕТЬ КУДА СМОТРИТ 
+-A DOCKER ! -i docker0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 172.17.0.2:80
+
+root@hlbu-ubuntu:~# docker inspect 136ab2da30b3 | grep 172
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+
+
+ВСЕ ОСТАНОВИЛИ И ПОУДАЛЯЛИ 
+ ЗАТЕМ ЗАПУСКАЕМ
+1.СМОТРИМ НА ИНСПЕКТ НЖИНГС
+ root@hlbu-ubuntu:~# docker inspect nginx
+2. root@hlbu-ubuntu:~# docker run -d -p 80:80 -v /var/www/8080/:/usr/share/nginx/html nginx
+1a9215f27241ecf8a6c1cfeb73174f576bed9797b651531e3a6f72149a50518d
+root@hlbu-ubuntu:~#
+root@1a9215f27241:/# ls -l /usr/share/nginx/html/
+total 12
+-rw-r--r-- 1 root root 10932 Apr 11 07:44 index.html
+root@1a9215f27241:/# cat /usr/share/nginx/html/index.html
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN
+
+root@1a9215f27241:/# ls -l /usr/share/nginx/html/
+total 12
+-rw-r--r-- 1 root root 10932 Apr 11 07:44 index.html
+root@1a9215f27241:/# cat /usr/share/nginx/html/index.html
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN
+
+ПОЛУЧАЕМ СВЯЗКУ КАТАЛОГА РЕАЛЬНОГО С КАТАЛОГОМ КОНТЕЙЦНЕРА
+
+root@1a9215f27241:/# grep 8080 -r /usr/share/nginx/html/index.html
+    <title>Apache2 (8080) Ubuntu Default Page: It works</title>
+          Apache2 (8080) Ubuntu Default Page
+
+
+ТЕ НА ДОКЕРЕ  grep 8080 -r /usr/share/nginx/html/index.html
+ФАЙЛ СООТВЕТСВУЕТ НА РЕАЛЬНОМ КОМПЕ ----- /var/www/8080/
+
+/var/www/8080/:/usr/share/nginx/html
+
+root@hlbu-ubuntu:~# docker run -d -p 80:80 -v /var/www/8080/:/usr/share/nginx/html nginx
+=================================================================================
+
+ЧТО БЫ СКАЧАТЬ С РЕПОЗИТОРИЯ САЙТА ОБРАЗ
+ПИТОНА НАПРИМЕР:
+hlbu@hlbu-ubuntu:~$ docker pull python:alpine
+alpine: Pulling from library/python
+aad63a933944: Already exists
+
+СМОТРИМ ЗАГРУЖЕННЫЕ ОБРАЗЫ:
+
+hlbu@hlbu-ubuntu:~$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+mysql               latest              9228ee8bac7a        2 weeks ago         547MB
+python              alpine              d5e5ad4a4fc0        3 weeks ago         107MB
+.................
+
+УСЛИ НАДО ВВОДИТЬ ДАННЫЕ ПРЯМО С КОНСОЛИ ()С НАРУЖИ -ti ИСПОЛЬЗУЕТСЯ 
+
+hlbu@hlbu-ubuntu:~$ docker run -t -i -u 60 python:alpine
+Python 3.8.2 (default, Mar 24 2020, 02:56:01)
+[GCC 9.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 
+
+
+ЗАХОД ВНУТРЬ КОНТЕНЕРА exec
+
+hlbu@hlbu-ubuntu:~$ docker exec -ti e0b32dcf156a ls
+bin    etc    lib    mnt    proc   run    srv    tmp    var
+dev    home   media  opt    root   sbin   sys    usr
+
+ls ЭТО МЫ ЗАШЛИ И ВЫШЛИ 
+А КОГДА ИСПОЛЬЗУЕТСЯ ШЕЛЛ
+ТО ЗАПУСКАЕМ ПРОЦЕСС ВНОУТРИ  И ОСТАЕМСЯ
+hlbu@hlbu-ubuntu:~$ docker exec -ti e0b32dcf156a sh
+/ $
+/ $
+/ $ ps aux
+PID   USER     TIME  COMMAND
+    1 60        0:00 python3
+   11 60        0:00 sh
+   16 60        0:00 ps aux
+/ $ cat /etc/*release
+3.11.5
+NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.11.5
+PRETTY_NAME="Alpine Linux v3.11"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"
+/ $
+
+ЗАПУЩЕН НОВЫЙ КОНТЕЙНЕР 
+45b4a378754d        python:alpine       "python3"           16 seconds ago      Up 14 seconds  
+ЕСЛИ НАДО ЗАПУСТИТЬ КОНТЕЙНЕР НИЖЕ                                      elastic_keller
+b1549b223299        python:alpine       "python3"           2 minutes ago       Exited (0) About a minute ago   
+ТО ДЕЛАЕМ ТАК 
+hlbu@hlbu-ubuntu:~$ docker start b1549b223299
+b1549b223299
+
+hlbu@hlbu-ubuntu:~$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+45b4a378754d        python:alpine       "python3"           3 minutes ago       Up 3 minutes                                   elastic_keller
+b1549b223299        python:alpine       "python3"           4 minutes ago       Up 3 seconds    
+ 
+И СЩЩТВЕТСТВЕННО МОЖНО ЗАЙТИ В ЛЮБОЙ ИЗ ЭТИХ КОНТЕЙНРОВ  ЧТО БЫ ЧТОТО ТАМ ПОСМОТРЕТЬ ИЛИ СДЕЛАТЬ 
+
+
+МОЖНО ЗАДАТЬ ИМЯ КОНТЕЙНЕРУ 
+hlbu@hlbu-ubuntu:~$ docker run -ti --name python3 alpine:python
+И УДАЛИТЬ КОНТЕЙНЕР ПОСЛЕ ЗАВЕРШЕНИЯ РАБОТЫ
+ 
+hlbu@hlbu-ubuntu:~$ docker run -ti --rm --name python3 alpine:python
+
+СКРИПТЫ .....................................................юююююююЮЮЮЮЮЮЮЮЮЮЮЮЮЮЮ
+все ФАЙЛЫ КОТОРЫЕ КОНТЕЙНЕР БУДЕТ СОЗДАВАТЬ ВНУТРИ ПАПКИ app ПОСЛЕ ТОГО КАК оНА БУДЕТ ЗАСУНУТА ВНУТРЬ КОНТЕЙНЕРА ФАЙЛЫ БУДУТ СОЗДАВАТЬСЯ ПОД РУТОМ . дАВАЙТЕ ЗАСУНЕМ ЭТУ ПАПКУ ВНУТРЬ КОНТЕЙНЕРА В ПАПКУ /app/
+УКАЗЫВАЕМ ПУТЬ ДО НЕЕ /home/hlbu/
+
+ОТ КУДА С (МОЕЙ ХОСТОВОЙ СИСТЕМЫ)<КУДА > (В ПАПКУ КОНТЕЙНЕРА app) 
+hlbu@hlbu-ubuntu:~$ docker run  -ti --rm --name pyth03 -v /home/hlbu/app/:/app python:alpine
+Python 3.8.2 (default, Mar 24 2020, 02:56:01)
+[GCC 9.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+
+ЗАХОДИМ ВНУТРЬ 
+hlbu@hlbu-ubuntu:~$ docker exec -ti pyth03 sh
+/ # ls
+app    bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # cd app/
+/app # ll
+sh: ll: not found
+/app # ls
+/app # ls -la
+total 8
+drwxrwxr-x    2 1000     1000          4096 Apr 15 19:45 .
+drwxr-xr-x    1 root     root          4096 Apr 15 20:03 ..
+/app # ls
+file1.txt
+/app # cat /app/file1.txt
+HI, qweqweqw qwe/app #
+
+В ДРУГОЙ ОБОЛОЧКЕ ГДЕ ПИТОН
+hlbu@hlbu-ubuntu:~$ docker run  -ti --rm --name pyth03 -v /home/hlbu/app/:/app python:alpine
+Python 3.8.2 (default, Mar 24 2020, 02:56:01)
+[GCC 9.2.0] on linux
+
+>>>
+>>> f=open("/app/file1.txt", "w")
+>>>
+>>> f.write("HI, qweqweqw qwe")
+16
+>>> f.close()
+
+
+ЭТО В КОНТЕЙНЕРЕ 
+И ЕСЛИ ЗАЙТИ НА ХОСТЕ ТО ЭТО БУДЕТ И ТАМ  И НАООБОТОТ ЕСЛИ ПИСАТЬ НА ХОСТЕ ТО БУДЕТ ПИСАТЬСЯ И В КОНТЕЙНЕРЕ
+
+НО НЕ ОБЯЗАТЕЛНО ИЕНОВАТЬ ПАПКИОДИНАКОГО МОЖНО В КОНТЕЙНЕРЕ ИЕНОВАТЬ НАПРИМЕР data_imp
+
+hlbu@hlbu-ubuntu:~$ docker run -tiu 3333 --rm --name pyQWEq -v /home/hlbu/app/:/datpython:alpine sh
+/ $
+/ $
+/ $ ls
+bin       etc       media     proc      sbin      tmp
+data_imp  home      mnt       root      srv       usr
+
+
+
+И НА ХОСТЕ СОЗДАТЬ ФАЙЛ В ПАПКЕ app/ 
+
+hlbu@hlbu-ubuntu:~$ echo "hello data"> app/file3
+hlbu@hlbu-ubuntu:~$ echo "hello data from app host">> app/file3
+
+НО УВИДЕТЬ ЕГО В КОНТЕЙНЕРЕ  В КАТАЛОГЕ data_imp/
+/ $ ls -l data_imp/
+total 12
+-rw-rw-r--    1 1000     1000            17 Apr 15 20:47 FILE2.txt
+-rwxrwxrwx    1 root     root             0 Apr 16 07:12 file1.txt
+-rw-rw-rw-    1 1000     1000            11 Apr 16 07:16 file2
+-rw-rw-r--    1 1000     1000            11 Apr 16 07:25 file3
+/ $ cat data_imp/file3
+hello data
+/ $ cat data_imp/file3
+hello data
+hello data from app host
+/ $
