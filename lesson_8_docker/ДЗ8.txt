@@ -1,0 +1,265 @@
+Сначала обновляем существующий перечень пакетов:
+
+sudo apt update
+Затем устанавливаем необходимые пакеты, которые позволяют apt использовать пакеты по HTTPS:
+
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+
+Затем добавляем в свою систему ключ GPG официального репозитория Docker:
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+Добавляем репозиторий Docker в список источников пакетов APT:
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+Затем обновим базу данных пакетов информацией о пакетах Docker из вновь добавленного репозитория:
+
+sudo apt update
+Следует убедиться, что мы устанавливаем Docker из репозитория Docker, а не из репозитория по умолчанию Ubuntu:
+
+apt-cache policy docker-ce
+Вывод 
+
+root@hlbu-ubuntu:~# apt-cache policy docker-ce
+docker-ce:
+  Installed: 5:19.03.8~3-0~ubuntu-bionic
+  Candidate: 5:19.03.8~3-0~ubuntu-bionic
+  Version table:
+ *** 5:19.03.8~3-0~ubuntu-bionic 500
+....................................
+
+устанавливаем Docker:
+
+apt install docker-ce
+
+Убедимся, что процесс запущен:
+
+systemctl status docker
+
+root@hlbu-ubuntu:~# systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since Wed 2020-04-15 08:58:19 MSK; 4h 19min ago
+     Docs: https://docs.docker.com
+ Main PID: 1055 (dockerd)
+    Tasks: 18
+/........................................
+можно использовать утилиту командной строки docker
+
+Для просмотра всех доступных подкоманд введите:
+
+docker
+Полный список подкоманд Docker 18:
+
+Output
+
+  attach      Attach local standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile
+  commit      Create a new image from a container's changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  diff        Inspect changes to files or directories on a container's filesystem
+  events      Get real time events from the server
+  exec        Run a command in a running containe
+ююююююю........................................
+
+Для просмотра всей информации о Docker используется следующая команда:
+
+root@hlbu-ubuntu:~# docker info
+Client:
+ Debug Mode: false
+
+Server:
+ Containers: 6
+  Running: 1
+  Paused: 0
+  Stopped: 5
+ Images: 3
+ Server Version: 19.03.8
+////....................
+
+Чтобы проверить, можно ли осуществлять доступ и загружать образы из Docker:
+
+root@hlbu-ubuntu:~# docker run hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+Образы, доступные в Docker Hub:
+
+root@hlbu-ubuntu:~# docker search ubuntu
+NAME                                                      DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+ubuntu                                                    Ubuntu is a Debian-based Linux operating sys…   10767               [OK]            
+dorowu/ubuntu-desktop-lxde-vnc                            Docker image to provide HTML5 VNC interface …   415                                     [OK]
+rastasheep/ubuntu-sshd                                    Dockerized SSH service, built on top of offi…   245                                     [OK]
+consol/ubuntu-xfce-vnc                                    Ubuntu container with "headless" VNC session…   214    
+
+root@hlbu-ubuntu:~# docker search nginx
+NAME                               DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+nginx                              Official build of Nginx.                        12984               [OK]
+jwilder/nginx-proxy                Automated Nginx reverse proxy for docker con…   1776                                    [OK]
+richarvey/nginx-php-fpm            Container running Nginx + PHP-FPM capable of…   764                                     [OK]
+linuxserver/nginx                  An Nginx container, brought to you by LinuxS…   105
+ПРОСМОТР СКАЧАННЫХ ВЕРСИЙ:
+root@hlbu-ubuntu:~# docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+
+
+ЗАПУСКАЕМ КОНТЕЙНЕР НА 80 ПОРТУ :
+
+root@hlbu-ubuntu:~# docker run -d -p 80:80 nginx
+6fbf7273a883905457d1ebee5b6ad23f1351e84aa4d8146f05ae19dbffda03fe
+root@hlbu-ubuntu:~# iptables-save
+# Generated by iptables-save v1.6.1 on Wed Apr 15 11:14:32 2020
+*filter
+:INPUT ACCEPT [44:2932]
+
+................................................
+-A DOCKER ! -i docker0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 172.17.0.2:80
+
+root@hlbu-ubuntu:~# netstat -tnlp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      775/mysqld
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      424/systemd-resolve
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      717/sshd
+tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      2031/cupsd
+tcp6       0      0 :::80                   :::*                    LISTEN      2829/docker-proxy
+
+ВХОДД В ДОКЕР
+root@hlbu-ubuntu:~# docker exec -ti 4377a52aed8f bash
+root@4377a52aed8f:/# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+ГДЕ ЛЕЖИТ ЧТО 
+
+root@4377a52aed8f:/# type nginx
+nginx is /usr/sbin/nginx
+
+СНОВА  ОСТАНОВИТЬ -УДАЛИТЬ ЗАПУСТИТЬ 
+root@hlbu-ubuntu:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                NAMES
+4377a52aed8f        nginx               "nginx -g 'daemon of…"   About an hour ago   Up About an hour    0.0.0.0:80->80/tcp   objective_tesla
+root@hlbu-ubuntu:~# docker stop 4377a52aed8f
+4377a52aed8f
+root@hlbu-ubuntu:~# docker rm 4377a52aed8f
+4377a52aed8f
+root@hlbu-ubuntu:~# docker run -d -p 80:80 nginx
+6fbf7273a883905457d1ebee5b6ad23f1351e84aa4d8146f05ae19dbffda03fe
+root@hlbu-ubuntu:~# iptables-save
+# Generated by iptables-save v1.6.1 on Wed Apr 15 11:14:32 2020
+*filter
+:INPUT ACCEPT [44:2932]
+
+
+И ПОСМОТРЕТЬ КУДА СМОТРИТ 
+-A DOCKER ! -i docker0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 172.17.0.2:80
+
+
+root@hlbu-ubuntu:~# docker inspect 136ab2da30b3 | grep 172
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+
+ВСЕ ОСТАНОВИЛИ И ПОУДАЛЯЛИ 
+ ЗАТЕМ ЗАПУСКАЕМ
+1.СМОТРИМ НА ИНСПЕКТ НЖИНГС
+ root@hlbu-ubuntu:~# docker inspect nginx
+2. root@hlbu-ubuntu:~# docker run -d -p 80:80 -v /var/www/8080/:/usr/share/nginx/html nginx
+1a9215f27241ecf8a6c1cfeb73174f576bed9797b651531e3a6f72149a50518d
+root@hlbu-ubuntu:~#
+root@1a9215f27241:/# ls -l /usr/share/nginx/html/
+total 12
+-rw-r--r-- 1 root root 10932 Apr 11 07:44 index.html
+root@1a9215f27241:/# cat /usr/share/nginx/html/index.html
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN
+
+root@1a9215f27241:/# ls -l /usr/share/nginx/html/
+total 12
+-rw-r--r-- 1 root root 10932 Apr 11 07:44 index.html
+root@1a9215f27241:/# cat /usr/share/nginx/html/index.html
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN
+
+ПОЛУЧАЕМ СВЯЗКУ КАТАЛОГА РЕАЛЬНОГО С КАТАЛОГОМ КОНТЕЙНЕРА
+
+root@1a9215f27241:/# grep 8080 -r /usr/share/nginx/html/index.html
+    <title>Apache2 (8080) Ubuntu Default Page: It works</title>
+          Apache2 (8080) Ubuntu Default Page
+
+
+ТЕ НА ДОКЕРЕ  grep 8080 -r /usr/share/nginx/html/index.html
+ФАЙЛ СООТВЕТСВУЕТ НА РЕАЛЬНОМ КОМПЕ ----- /var/www/8080/
+
+/var/www/8080/:/usr/share/nginx/html
+
+Для просмотра загруженных на компьютер образов:
+
+root@hlbu-ubuntu:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              ed21b7a8aee9        2 weeks ago         127MB
+mysql               latest              9228ee8bac7a        2 weeks ago         547MB
+hello-world         latest              fce289e99eb9        15 months ago       1.84kB
+
+
+
+Чтобы увидеть последние из созданных контейнеров,  -l:
+
+root@hlbu-ubuntu:~# docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+411425d9d2f8        hello-world         "/hello"            20 minutes ago      Exited (0) 20 minutes ago                       objective_cohe
+
+Для запуска остановленного контейнера используем команду docker start с идентификатором
+
+Для остановки запущенного контейнера используем команду docker stop, затем указываем идентификатор контейнера или его имя. 
+
+удаляем его командой docker rm
+
+все ФАЙЛЫ КОТОРЫЕ КОНТЕЙНЕР БУДЕТ СОЗДАВАТЬ ВНУТРИ ПАПКИ app ПОСЛЕ ТОГО КАК оНА БУДЕТ ЗАСУНУТА ВНУТРЬ КОНТЕЙНЕРА ФАЙЛЫ БУДУТ СОЗДАВАТЬСЯ ПОД РУТОМ . ЗАСУНЕМ ЭТУ ПАПКУ ВНУТРЬ КОНТЕЙНЕРА В ПАПКУ /app/
+УКАЗЫВАЕМ ПУТЬ ДО НЕЕ /home/hlbu/
+
+ОТ КУДА С (МОЕЙ ХОСТОВОЙ СИСТЕМЫ)<КУДА > (В ПАПКУ КОНТЕЙНЕРА app) 
+hlbu@hlbu-ubuntu:~$ docker run  -ti --rm --name pyth03 -v /home/hlbu/app/:/app python:alpine
+Python 3.8.2 (default, Mar 24 2020, 02:56:01)
+[GCC 9.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+
+ЗАХОДИМ ВНУТРЬ 
+hlbu@hlbu-ubuntu:~$ docker exec -ti pyth03 sh
+/ # ls
+app    bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # cd app/
+/app # ll
+sh: ll: not found
+/app # ls
+/app # ls -la
+total 8
+drwxrwxr-x    2 1000     1000          4096 Apr 15 19:45 .
+drwxr-xr-x    1 root     root          4096 Apr 15 20:03 ..
+/app # ls
+file1.txt
+/app # cat /app/file1.txt
+HI, qweqweqw qwe/app #
+
+В ДРУГОЙ ОБОЛОЧКЕ ГДЕ ПИТОН
+hlbu@hlbu-ubuntu:~$ docker run  -ti --rm --name pyth03 -v /home/hlbu/app/:/app python:alpine
+Python 3.8.2 (default, Mar 24 2020, 02:56:01)
+[GCC 9.2.0] on linux
+
+>>>
+>>> f=open("/app/file1.txt", "w")
+>>>
+>>> f.write("HI, qweqweqw qwe")
+16
+>>> f.close()
